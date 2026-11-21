@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>관계도 메이커</title>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Orbitron:wght@500;700&family=Do+Hyeon&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;height:100dvh;display:flex;flex-direction:column;font-family:var(--font);color:var(--ink);background:var(--bg);transition:background .3s}
+body[data-t=sketch]{--bg:repeating-linear-gradient(transparent 0 31px,#c9dbe8 31px 32px),#fbf7ea;--ink:#3b3b3b;--ui:#fffdf5;--uink:#3b3b3b;--acc:#e8a21c;--halo:#fbf7ea;--font:'Gaegu','Noto Sans KR',cursive;--fs:24px;--ew:4px;--rw:3px;--ringf:#fff;--ph:#ffe9a8;--ringc:#3b3b3b;--c0:#555;--c1:#3d9a4a;--c2:#d83a3a;--c3:#e56aa0;--c4:#e8a21c;--c5:#4a7fd4}
+body[data-t=summer]{--bg:linear-gradient(160deg,#6fd3ff,#2f86e8 55%,#1d46b0);--ink:#fff;--ui:rgba(255,255,255,.9);--uink:#12408f;--acc:#ffd84d;--halo:#2a73d6;--font:'Jua','Noto Sans KR',sans-serif;--fs:21px;--ew:4px;--rw:4px;--ringf:#fff;--ph:#bfe6ff;--ringc:#fff;--c0:#fff;--c1:#b8ff8a;--c2:#ff7a8a;--c3:#ffc4e6;--c4:#ffe66b;--c5:#9ff3ff}
+body[data-t=themis]{--bg:radial-gradient(ellipse at 50% 0,#12234d,#070d1f 70%);--ink:#d9e2ee;--ui:rgba(10,20,45,.92);--uink:#d9e2ee;--acc:#4df0ff;--halo:#08112a;--font:'Orbitron','Noto Sans KR',sans-serif;--fs:16px;--ew:2px;--rw:2px;--ringf:#0b1634;--ph:#14264f;--ringc:#c0c8d4;--c0:#c0c8d4;--c1:#4df0ff;--c2:#ff4d6d;--c3:#a78bfa;--c4:#6ea8ff;--c5:#f2f6fc}
+body[data-t=apsu]{--bg:radial-gradient(#3a1060 1.5px,transparent 2px) 0 0/22px 22px,#0a0010;--ink:#fff;--ui:#14001f;--uink:#fff;--acc:#c26bff;--halo:#0a0010;--font:'Do Hyeon','Noto Sans KR',sans-serif;--fs:22px;--ew:5px;--rw:6px;--ringf:#14001f;--ph:#4b1a7a;--ringc:#b44cff;--c0:#fff;--c1:#c26bff;--c2:#ff2d95;--c3:#ffe600;--c4:#00e5ff;--c5:#7a3cff}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 10px;background:var(--ui);color:var(--uink);z-index:2}
+header input[type=text]{font:inherit;font-size:20px;background:transparent;border:0;border-bottom:2px solid var(--acc);color:inherit;width:min(240px,100%);padding:2px 4px}
+.grp{display:flex;gap:6px;flex-wrap:wrap}
+button,.btn{font:inherit;font-size:16px;padding:6px 12px;border-radius:8px;border:2px solid var(--acc);background:transparent;color:inherit;cursor:pointer}
+button.on{background:var(--acc);color:#111}
+button.pri{background:var(--acc);color:#111}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#cv{flex:1;width:100%;min-height:0;touch-action:none;cursor:grab;display:block}
+.edge{fill:none;stroke-width:var(--ew);stroke-linecap:round}
+.edge.on{stroke-width:calc(var(--ew) + 3px)}
+.hit{stroke:transparent;stroke-width:22;cursor:pointer}
+.lb{font-size:var(--fs);text-anchor:middle;paint-order:stroke;stroke:var(--halo);stroke-width:6px;stroke-linejoin:round;fill:var(--ink);cursor:pointer}
+.node{cursor:pointer}
+.ring{fill:var(--ringf);stroke:var(--ringc);stroke-width:var(--rw)}
+.node.on .ring,.node.from .ring{stroke-dasharray:7 5;stroke:var(--acc)}
+.ph{fill:var(--ph)}
+.ini{font-size:36px;text-anchor:middle;fill:var(--ink)}
+.nm{font-size:calc(var(--fs) + 2px);text-anchor:middle;paint-order:stroke;stroke:var(--halo);stroke-width:6px;stroke-linejoin:round;fill:var(--ink)}
+body[data-t=sketch] #eg{filter:url(#pencil)}
+body[data-t=sketch] .ring{filter:url(#pencil)}
+body[data-t=themis] .edge{filter:drop-shadow(0 0 4px currentColor)}
+body[data-t=themis] .ring{filter:drop-shadow(0 0 6px #4df0ff)}
+body[data-t=apsu] .ring{filter:drop-shadow(5px 5px 0 #ff2d95)}
+body[data-t=apsu] .edge{filter:drop-shadow(3px 3px 0 #000)}
+body[data-t=summer] .edge{filter:drop-shadow(0 2px 3px rgba(0,40,120,.35))}
+#panel{position:fixed;right:12px;bottom:12px;width:290px;max-height:70dvh;overflow:auto;background:var(--ui);color:var(--uink);border:2px solid var(--acc);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;z-index:3}
+#panel[hidden]{display:none}
+#panel h3{margin:0;font-size:20px}
+#panel label{display:flex;flex-direction:column;gap:4px;font-size:15px}
+#panel input[type=text]{font:inherit;font-size:17px;padding:6px 8px;border-radius:8px;border:2px solid var(--acc);background:transparent;color:inherit}
+#panel input.bad{border-color:#ff4d4d}
+.sw{display:flex;gap:8px;flex-wrap:wrap}
+.sw button{width:44px;height:44px;border-radius:50%;padding:0;border-width:3px;border-color:transparent;background:var(--c);box-shadow:0 0 0 2px rgba(128,128,128,.5)}
+.sw button.on{border-color:var(--uink);box-shadow:0 0 0 3px var(--acc)}
+.sw span{font-size:12px;display:block;text-align:center}
+.zm{position:fixed;left:12px;bottom:12px;display:flex;flex-direction:column;gap:6px;z-index:2}
+.zm button{width:40px;background:var(--ui);color:var(--uink)}
+#hint{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:var(--acc);color:#111;padding:6px 14px;border-radius:20px;font-size:16px;z-index:4}
+#hint[hidden]{display:none}
+@media(max-width:600px){#panel{left:8px;right:8px;bottom:8px;width:auto;max-height:55dvh}.zm{bottom:auto;top:120px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body data-t="sketch">
+<header>
+  <input type="text" id="ttl" placeholder="관계도 제목" aria-label="관계도 제목" maxlength="40">
+  <div class="grp" id="themes"></div>
+  <div class="grp">
+    <button id="add" class="pri">+ 인물</button>
+    <button id="conn">관계 잇기</button>
+    <button id="exp">저장</button>
+    <button id="imp">불러오기</button>
+    <button id="new">새로 만들기</button>
+  </div>
+  <input type="file" id="file" accept=".json,application/json" hidden>
+</header>
+<svg id="cv" role="img" aria-label="관계도 캔버스">
+  <defs>
+    <clipPath id="cp" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath>
+    <filter id="pencil" filterUnits="userSpaceOnUse" x="-5000" y="-5000" width="10000" height="10000"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter>
+  </defs>
+  <g id="eg"></g><g id="hg"></g><g id="lg"></g><g id="ng"></g>
+</svg>
+<div class="zm"><button id="zi" aria-label="확대">+</button><button id="zo" aria-label="축소">−</button></div>
+<div id="hint" hidden></div>
+<aside id="panel" hidden></aside>
+
+<script>
+const $=s=>document.querySelector(s), KEY='relmap-v1', R=42;
+const THEMES=[['sketch','스케치북'],['summer','여름청춘'],['themis','THEMIS'],['apsu','APSU']];
+const PRESETS=['기본','우호','적대','연애','가족','미묘'];
+const uid=()=>Date.now()*1000+Math.floor(Math.random()*1000);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const svg=$('#cv'), P=$('#panel');
+let S=load()||sample(), sel=null, mode=null, from=null, drag=null, vb={x:0,y:0,w:1000,h:700};
+
+function sample(){return{title:'우리 관계도',theme:'sketch',
+ nodes:[{id:1,name:'하린',img:'',x:300,y:300},{id:2,name:'시우',img:'',x:650,y:230},{id:3,name:'도현',img:'',x:520,y:480}],
+ edges:[{id:4,a:1,b:2,label:'소꿉친구',c:1},{id:5,a:2,b:3,label:'라이벌',c:2},{id:6,a:3,b:1,label:'짝사랑',c:3}]}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));return d&&Array.isArray(d.nodes)?d:null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){hint('저장 공간이 부족해요. 저장 버튼으로 파일을 내려받으세요')}}
+let ht;function hint(t,keep){const h=$('#hint');h.textContent=t;h.hidden=false;clearTimeout(ht);if(!keep)ht=setTimeout(()=>h.hidden=true,2500)}
+const N=id=>S.nodes.find(n=>n.id===id);
+const pt=ev=>{const p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())};
+function fit(){vb.h=vb.w*svg.clientHeight/svg.clientWidth}
+
+function render(){
+  document.body.dataset.t=S.theme;
+  svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  let e='',h='',l='',n='';
+  for(const g of S.edges){const a=N(g.a),b=N(g.b);if(!a||!b)continue;
+    const on=sel&&sel.t==='e'&&sel.id===g.id,c=`style="stroke:var(--c${g.c});color:var(--c${g.c})"`;
+    e+=`<line class="edge${on?' on':''}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" ${c}/>`;
+    h+=`<line class="hit" data-e="${g.id}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>`;
+    if(g.label)l+=`<text class="lb" data-e="${g.id}" x="${(a.x+b.x)/2}" y="${(a.y+b.y)/2+7}">${esc(g.label)}</text>`}
+  for(const d of S.nodes){const on=sel&&sel.t==='n'&&sel.id===d.id;
+    n+=`<g class="node${on?' on':''}${from===d.id?' from':''}" data-n="${d.id}" transform="translate(${d.x} ${d.y})"><circle class="ring" r="${R+4}"/>`+
+    (d.img?`<image href="${d.img}" x="${-R}" y="${-R}" width="${2*R}" height="${2*R}" clip-path="url(#cp)" preserveAspectRatio="xMidYMid slice"/>`:`<circle class="ph" r="${R}"/><text class="ini" y="12">${esc([...d.name][0]||'')}</text>`)+
+    `<text class="nm" y="${R+32}">${esc(d.name)}</text></g>`}
+  $('#eg').innerHTML=e;$('#hg').innerHTML=h;$('#lg').innerHTML=l;$('#ng').innerHTML=n;
+  $('#ttl').value!==S.title&&($('#ttl').value=S.title);
+  document.querySelectorAll('#themes button').forEach(b=>b.classList.toggle('on',b.dataset.t===S.theme));
+  $('#conn').classList.toggle('on',mode==='conn');
+}
+
+/* 캔버스 조작 */
+svg.addEventListener('pointerdown',ev=>{
+  const nE=ev.target.closest('[data-n]'),eE=ev.target.closest('[data-e]'),p=pt(ev);
+  if(nE){const id=+nE.dataset.n;
+    if(mode==='conn'){
+      if(from==null){from=id;hint('이어질 두 번째 인물을 누르세요',true)}
+      else if(from!==id){const g={id:uid(),a:from,b:id,label:'',c:0};S.edges.push(g);endConn();sel={t:'e',id:g.id};save()}
+      render();panel();return}
+    sel={t:'n',id};const d=N(id);drag={k:'n',d,dx:p.x-d.x,dy:p.y-d.y};
+  }else if(eE&&mode!=='conn'){sel={t:'e',id:+eE.dataset.e}}
+  else{sel=null;drag={k:'p',cx:ev.clientX,cy:ev.clientY,vx:vb.x,vy:vb.y}}
+  svg.setPointerCapture(ev.pointerId);render();panel();
+});
+svg.addEventListener('pointermove',ev=>{
+  if(!drag)return;
+  if(drag.k==='n'){const p=pt(ev);drag.d.x=Math.round(p.x-drag.dx);drag.d.y=Math.round(p.y-drag.dy)}
+  else{const k=vb.w/svg.clientWidth;vb.x=drag.vx-(ev.clientX-drag.cx)*k;vb.y=drag.vy-(ev.clientY-drag.cy)*k}
+  render();
+});
+const up=()=>{if(drag){drag=null;save()}};
+svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+function zoom(f,p){p=p||{x:vb.x+vb.w/2,y:vb.y+vb.h/2};vb.x=p.x-(p.x-vb.x)*f;vb.y=p.y-(p.y-vb.y)*f;vb.w*=f;vb.h*=f;render()}
+svg.addEventListener('wheel',ev=>{ev.preventDefault();zoom(ev.deltaY>0?1.1:.9,pt(ev))},{passive:false});
+$('#zi').onclick=()=>zoom(.8);$('#zo').onclick=()=>zoom(1.25);
+function endConn(){mode=null;from=null;$('#hint').hidden=true}
+
+/* 사진 */
+function readImg(f,cb){if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
+  const s=Math.min(im.width,im.height),c=document.createElement('canvas');c.width=c.height=200;
+  c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,200,200);cb(c.toDataURL('image/jpeg',.85))};im.src=r.result};r.readAsDataURL(f)}
+
+/* 편집 패널 */
+function panel(){
+  if(!sel){P.hidden=true;return}
+  P.hidden=false;const q=s=>P.querySelector(s);
+  if(sel.t==='new'){
+    P.innerHTML=`<h3>인물 추가</h3><label>이름 (필수)<input type="text" id="nm" maxlength="20" placeholder="이름을 입력하세요"></label><label>사진<input type="file" id="ph" accept="image/*"></label><button class="pri" id="ok" disabled>추가하기</button><button id="cx">닫기</button>`;
+    let img='';q('#nm').focus();
+    q('#nm').oninput=e=>q('#ok').disabled=!e.target.value.trim();
+    q('#ph').onchange=e=>readImg(e.target.files[0],d=>img=d);
+    q('#ok').onclick=()=>{const nm=q('#nm').value.trim();if(!nm)return;
+      const d={id:uid(),name:nm,img,x:Math.round(vb.x+vb.w/2+(Math.random()-.5)*160),y:Math.round(vb.y+vb.h/2+(Math.random()-.5)*160)};
+      S.nodes.push(d);sel={t:'n',id:d.id};save();render();panel()};
+    q('#cx').onclick=()=>{sel=null;panel()};
+  }else if(sel.t==='n'){
+    const d=N(sel.id);if(!d){sel=null;P.hidden=true;return}
+    P.innerHTML=`<h3>인물</h3><label>이름 (필수)<input type="text" id="nm" maxlength="20" value="${esc(d.name)}"></label><label>사진 ${d.img?'바꾸기':'넣기'}<input type="file" id="ph" accept="image/*"></label>${d.img?'<button id="rm">사진 지우기</button>':''}<button class="pri" id="lk">이 인물에서 관계 잇기</button><button id="dl">인물 삭제</button>`;
+    const nm=q('#nm');
+    nm.oninput=()=>{nm.classList.toggle('bad',!nm.value.trim());if(nm.value.trim()){d.name=nm.value.trim();render()}};
+    nm.onblur=()=>{if(!nm.value.trim()){nm.value=d.name;nm.classList.remove('bad')}save()};
+    q('#ph').onchange=e=>readImg(e.target.files[0],x=>{d.img=x;save();render();panel()});
+    if(q('#rm'))q('#rm').onclick=()=>{d.img='';save();render();panel()};
+    q('#lk').onclick=()=>{mode='conn';from=d.id;sel=null;hint('이어질 두 번째 인물을 누르세요',true);render();panel()};
+    q('#dl').onclick=()=>{if(!confirm(d.name+' 님과 연결된 관계도 함께 지워져요. 삭제할까요?'))return;
+      S.nodes=S.nodes.filter(x=>x.id!==d.id);S.edges=S.edges.filter(g=>g.a!==d.id&&g.b!==d.id);sel=null;save();render();panel()};
+  }else{
+    const g=S.edges.find(x=>x.id===sel.id);if(!g){sel=null;P.hidden=true;return}
+    P.innerHTML=`<h3>${esc(N(g.a).name)} ↔ ${esc(N(g.b).name)}</h3><label>관계 (선 위에 표시)<input type="text" id="lb" maxlength="16" placeholder="예: 소꿉친구" value="${esc(g.label)}"></label><div>선 색상<div class="sw">${PRESETS.map((t,i)=>`<div><button data-c="${i}" style="--c:var(--c${i})" class="${g.c===i?'on':''}" aria-label="${t}"></button><span>${t}</span></div>`).join('')}</div></div><button id="dl">관계 삭제</button>`;
+    q('#lb').oninput=e=>{g.label=e.target.value;save();render()};
+    P.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{g.c=+b.dataset.c;save();render();panel()});
+    q('#dl').onclick=()=>{S.edges=S.edges.filter(x=>x.id!==g.id);sel=null;save();render();panel()};
+  }
+}
+
+/* 상단 버튼 */
+THEMES.forEach(([k,t])=>{const b=document.createElement('button');b.textContent=t;b.dataset.t=k;b.onclick=()=>{S.theme=k;save();render()};$('#themes').append(b)});
+$('#ttl').oninput=e=>{S.title=e.target.value;save()};
+$('#add').onclick=()=>{endConn();sel={t:'new'};render();panel()};
+$('#conn').onclick=()=>{if(mode){endConn()}else{if(S.nodes.length<2){hint('인물을 2명 이상 추가해 주세요');return}mode='conn';sel=null;hint('이어줄 첫 번째 인물을 누르세요',true)}render();panel()};
+$('#exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download=(S.title||'relationship')+'.json';a.click();URL.revokeObjectURL(a.href)};
+$('#imp').onclick=()=>$('#file').click();
+$('#file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.nodes)||!Array.isArray(d.edges))throw 0;
+  S={title:d.title||'',theme:THEMES.some(t=>t[0]===d.theme)?d.theme:'sketch',nodes:d.nodes,edges:d.edges};sel=null;save();render();panel()}catch(x){hint('관계도 JSON 파일이 아니에요')}};r.readAsText(f);e.target.value=''};
+$('#new').onclick=()=>{if(!confirm('현재 관계도를 지우고 새로 시작할까요? (먼저 저장 버튼으로 내려받아 두세요)'))return;S={title:'',theme:S.theme,nodes:[],edges:[]};sel=null;endConn();save();render();panel()};
+addEventListener('resize',()=>{fit();render()});
+fit();render();
+</script>
+</body>
+</html>
